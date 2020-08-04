@@ -21,12 +21,50 @@ server.post("/api/users", (req, res) => {
     bio: req.body.bio, // String, required
   };
 
-  if (req.body.name === null || req.body.bio === null) {
-    return res
-      .status(400)
-      .json("'errorMessage': 'Please provide name and bio for the user.'");
-  } else {
-    users.push(newUser);
+  try {
+    if (req.body.name === undefined || req.body.bio === undefined) {
+      return res
+        .status(400)
+        .json({ errorMessage: "Please provide name and bio for the user." });
+    } else {
+      users.push(newUser);
+      return res.status(201).json(users);
+    }
+  } catch {
+    return res.statusMessage(500).json({
+      errorMessage: "There was an error while saving the user to the database",
+    });
+  }
+});
+
+server.get("/api/users", (req, res) => {
+  try {
     return res.status(201).json(users);
+  } catch {
+    return res
+      .status(500)
+      .json({ errorMessage: "The users information could not be retrieved." });
+  }
+});
+
+server.get("/api/users/:id", (req, res) => {
+  let userID = req.params.id;
+
+  console.log(userID);
+
+  let reqUser = users.find((user) => user.id === userID);
+
+  console.log(reqUser);
+
+  try {
+    reqUser
+      ? res.status(201).send(reqUser)
+      : res
+          .status(404)
+          .send({ message: "The user with the specified ID does not exist." });
+  } catch {
+    return res
+      .status(500)
+      .json({ errorMessage: "The user information could not be retrieved." });
   }
 });
